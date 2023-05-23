@@ -693,16 +693,28 @@ function doesTableExist(dbConfig: pg.ClientConfig, tableName: string) {
   client.on("error", (err) => console.log("doesTableExist on error", err))
   return client
     .connect()
-    .then(() =>
-      client.query(SQL`
+    .then(() => {
+      const parts = tableName.split(".")
+      const [schema, table] = (() => {
+        if (parts.length > 1) {
+          return [parts[0], parts[1]]
+        } else {
+          return ["public", tableName]
+        }
+      })()
+
+      return client.query(SQL`
         SELECT EXISTS (
           SELECT 1
           FROM   pg_catalog.pg_class c
-          WHERE  c.relname = ${tableName}
-          AND    c.relkind = 'r'
+          JOIN   pg_catalog.pg_namespace n 
+            ON     n.oid = c.relnamespace
+          WHERE  c.relname = ${table}
+            AND    c.relkind = 'r'
+            AND    n.nspname = ${schema}
         );
-      `),
-    )
+      `)
+    })
     .then((result) => {
       try {
         return client

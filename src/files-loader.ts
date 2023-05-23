@@ -21,6 +21,7 @@ export const loadMigrationFiles = async (
   directory: string,
   // tslint:disable-next-line no-empty
   log: Logger = () => {},
+  schemaName: string = "public",
 ): Promise<Array<Migration>> => {
   log(`Loading migrations from: ${directory}`)
 
@@ -44,6 +45,11 @@ export const loadMigrationFiles = async (
   const orderedMigrations = unorderedMigrations.sort((a, b) => a.id - b.id)
 
   validateMigrationOrdering(orderedMigrations)
+
+  orderedMigrations[0].sql = orderedMigrations[0].sql.replace(
+    "CREATE TABLE IF NOT EXISTS migrations",
+    `CREATE SCHEMA IF NOT EXISTS ${schemaName}; CREATE TABLE IF NOT EXISTS ${schemaName}.migrations`,
+  )
 
   return orderedMigrations
 }

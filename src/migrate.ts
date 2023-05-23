@@ -15,6 +15,15 @@ import {validateMigrationHashes} from "./validation"
 import {withConnection} from "./with-connection"
 import {withAdvisoryLock} from "./with-lock"
 
+const splitTableName = (tableName: string): [string, string] => {
+  const parts = tableName.split(".")
+  if (parts.length > 1) {
+    return [parts[0], parts[1]]
+  } else {
+    return ["public", tableName]
+  }
+}
+
 /**
  * Run the migrations.
  *
@@ -45,13 +54,17 @@ export async function migrate(
   if (typeof migrationsDirectory !== "string") {
     throw new Error("Must pass migrations directory as a string")
   }
-  const intendedMigrations = await loadMigrationFiles(migrationsDirectory, log)
+  const intendedMigrations = await loadMigrationFiles(
+    migrationsDirectory,
+    log,
+    config.schema,
+  )
 
   if ("client" in dbConfig) {
     // we have been given a client to use, it should already be connected
     return withAdvisoryLock(
       log,
-      runMigrations(intendedMigrations, log),
+      runMigrations(intendedMigrations, log, config.schema),
     )(dbConfig.client)
   }
 
@@ -99,17 +112,24 @@ export async function migrate(
 
     const runWith = withConnection(
       log,
-      withAdvisoryLock(log, runMigrations(intendedMigrations, log)),
+      withAdvisoryLock(
+        log,
+        runMigrations(intendedMigrations, log, config.schema),
+      ),
     )
 
     return runWith(client)
   }
 }
 
-function runMigrations(intendedMigrations: Array<Migration>, log: Logger) {
+function runMigrations(
+  intendedMigrations: Array<Migration>,
+  log: Logger,
+  schemaName: string = "public",
+) {
   return async (client: BasicPgClient) => {
     try {
-      const migrationTableName = "migrations"
+      const migrationTableName = `${schemaName}.migrations`
 
       log("Starting migrations")
 
@@ -202,12 +222,19 @@ function logResult(completedMigrations: Array<Migration>, log: Logger) {
 
 /** Check whether table exists in postgres - http://stackoverflow.com/a/24089729 */
 async function doesTableExist(client: BasicPgClient, tableName: string) {
-  const result = await client.query(SQL`SELECT EXISTS (
-  SELECT 1
-  FROM   pg_catalog.pg_class c
-  WHERE  c.relname = ${tableName}
-  AND    c.relkind = 'r'
-);`)
+  const [schema, table] = splitTableName(tableName)
+
+  const result = await client.query(SQL`
+    SELECT EXISTS (
+      SELECT 1
+      FROM   pg_catalog.pg_class c
+      JOIN   pg_catalog.pg_namespace n 
+        ON     n.oid = c.relnamespace
+      WHERE  c.relname = ${table}
+        AND    c.relkind = 'r'
+        AND    n.nspname = ${schema}
+    );
+  `)
 
   return result.rows.length > 0 && result.rows[0].exists
 }
