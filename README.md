@@ -1,9 +1,7 @@
 # Postgres schema migrations
 
-![GitHub Actions](https://github.com/ThomWright/postgres-migrations/actions/workflows/node.js.yml/badge.svg)
-[![npm](https://img.shields.io/npm/v/postgres-migrations.svg)](https://www.npmjs.com/package/postgres-migrations)
-[![David](https://img.shields.io/david/ThomWright/postgres-migrations.svg)](https://david-dm.org/ThomWright/postgres-migrations)
-[![David](https://img.shields.io/david/dev/ThomWright/postgres-migrations.svg)](https://david-dm.org/ThomWright/postgres-migrations)
+![GitHub Actions](https://github.com/zakpatterson/postgres-schema-migrations/actions/workflows/node.js.yml/badge.svg)
+[![npm](https://img.shields.io/npm/v/postgres-schema-migrations.svg)](https://www.npmjs.com/package/postgres-schema-migrations)
 
 This is a fork of Thom Wright's [PostgreSQL migration library](https://github.com/ThomWright/postgres-migrations) which allows for a schema to be specified and for separate migrations to be tracked based on schema. Using Postgres schema namespaces make it easy to reuse database code across projects, so it can be helpful to track migrations for different namespaces.
 
@@ -29,7 +27,7 @@ There are two ways to use the API.
 Either, pass a database connection config object:
 
 ```typescript
-import {migrate} from "postgres-migrations"
+import {migrate} from "postgres-schema-migrations"
 
 async function() {
   const dbConfig = {
@@ -55,7 +53,7 @@ async function() {
 Or, pass a `pg` client:
 
 ```typescript
-import {migrate} from "postgres-migrations"
+import {migrate} from "postgres-schema-migrations"
 
 async function() {
   const dbConfig = {
@@ -81,7 +79,7 @@ async function() {
 
 To track migrations within a given schema, just pass an additional `{schema: "your_schema_name"}` parameter to `migrate`, as in:
 
-```
+```typescript
   try {
     await migrate({client}, "path/to/schema/migration/files", {schema: "schema_name"})
   } finally {
