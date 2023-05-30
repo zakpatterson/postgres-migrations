@@ -1,9 +1,11 @@
-# Postgres migrations
+# Postgres schema migrations
 
 ![GitHub Actions](https://github.com/ThomWright/postgres-migrations/actions/workflows/node.js.yml/badge.svg)
 [![npm](https://img.shields.io/npm/v/postgres-migrations.svg)](https://www.npmjs.com/package/postgres-migrations)
 [![David](https://img.shields.io/david/ThomWright/postgres-migrations.svg)](https://david-dm.org/ThomWright/postgres-migrations)
 [![David](https://img.shields.io/david/dev/ThomWright/postgres-migrations.svg)](https://david-dm.org/ThomWright/postgres-migrations)
+
+This is a fork of Thom Wright's [PostgreSQL migration library](https://github.com/ThomWright/postgres-migrations) which allows for a schema to be specified and for separate migrations to be tracked based on schema. Using Postgres schema namespaces make it easy to reuse database code across projects, so it can be helpful to track migrations for different namespaces.
 
 A PostgreSQL migration library inspired by the Stack Overflow system described in [Nick Craver's blog](http://nickcraver.com/blog/2016/05/03/stack-overflow-how-we-do-deployment-2016-edition/#database-migrations).
 
@@ -74,6 +76,20 @@ async function() {
   }
 }
 ```
+
+### Namespaced migrations 
+
+To track migrations within a given schema, just pass an additional `{schema: "your_schema_name"}` parameter to `migrate`, as in:
+
+```
+  try {
+    await migrate({client}, "path/to/schema/migration/files", {schema: "schema_name"})
+  } finally {
+    await client.end()
+  }
+```
+
+Without specifying this parameter, this library will default to the `public` schema.
 
 ### Validating migration files
 

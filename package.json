@@ -1,13 +1,13 @@
 {
-  "name": "postgres-migrations",
-  "version": "5.3.14",
+  "name": "postgres-schema-migrations",
+  "version": "6.0.0",
   "description": "Stack Overflow style database migrations for PostgreSQL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "pg-validate-migrations": "./dist/bin/validate.js"
   },
-  "author": "Thom Wright",
+  "authors": ["Thom Wright", "Zak Patterson"],
   "keywords": [
     "postgres",
     "postgresql",
@@ -17,14 +17,14 @@
     "database",
     "db"
   ],
-  "homepage": "https://github.com/thomwright/postgres-migrations#readme",
+  "homepage": "https://github.com/zakpatterson/postgres-schema-migrations#readme",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:thomwright/postgres-migrations.git"
+    "url": "git@github.com:zakpatterson/postgres-schema-migrations.git"
   },
   "bugs": {
-    "url": "https://github.com/thomwright/postgres-migrations/issues"
+    "url": "https://github.com/zakpatterson/postgres-schema-migrations/issues"
   },
   "engines": {
     "node": ">10.17.0"
