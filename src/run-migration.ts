@@ -1,9 +1,12 @@
 import SQL from "sql-template-strings"
 import {Logger, Migration, BasicPgClient} from "./types"
 
-const noop = () => {
+const noop = (): void => {
   //
 }
+
+const asyncNoop = (): Promise<void> => Promise.resolve()
+
 const insertMigration = async (
   migrationTableName: string,
   client: BasicPgClient,
@@ -32,17 +35,21 @@ export const runMigration =
 
     log(`Running migration in transaction: ${inTransaction}`)
 
-    const begin = inTransaction ? () => client.query("START TRANSACTION") : noop
+    const begin = inTransaction
+      ? () => client.query("START TRANSACTION")
+      : asyncNoop
 
-    const end = inTransaction ? () => client.query("COMMIT") : noop
+    const end = inTransaction ? () => client.query("COMMIT") : asyncNoop
 
-    const cleanup = inTransaction ? () => client.query("ROLLBACK") : noop
+    const cleanup = inTransaction ? () => client.query("ROLLBACK") : asyncNoop
 
     try {
       await begin()
       await client.query(migration.sql)
+      log("Ran migration " + migration.fileName)
       await insertMigration(migrationTableName, client, migration, log)
-      await end()
+      log("inserted migration in migrations table" + migrationTableName)
+      end()
 
       return migration
     } catch (err) {
