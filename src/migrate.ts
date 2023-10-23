@@ -164,10 +164,11 @@ function runMigrations(
 
       return completedMigrations
     } catch (e) {
+      const exception: Error = e as Error
       const error: MigrationError = new Error(
-        `Migration failed. Reason: ${e.message}`,
+        `Migration failed. Reason: ${exception.message}`,
       )
-      error.cause = e
+      error.cause = exception.message
       throw error
     }
   }
@@ -221,7 +222,7 @@ function logResult(completedMigrations: Array<Migration>, log: Logger) {
 }
 
 /** Check whether table exists in postgres - http://stackoverflow.com/a/24089729 */
-async function doesTableExist(client: BasicPgClient, tableName: string) {
+export async function doesTableExist(client: BasicPgClient, tableName: string) {
   const [schema, table] = splitTableName(tableName)
 
   const result = await client.query(SQL`

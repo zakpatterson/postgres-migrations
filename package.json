@@ -1,6 +1,6 @@
 {
   "name": "postgres-schema-migrations",
-  "version": "6.0.3",
+  "version": "6.1.0",
   "description": "Stack Overflow style database migrations for PostgreSQL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
